@@ -1,10 +1,444 @@
-
-<!-- AR.js by @jerome_etienne - github: https://github.com/jeromeetienne/ar.js - info: https://medium.com/arjs/augmented-reality-in-10-lines-of-html-4e193ea9fdbf -->
-<script src="https://aframe.io/releases/0.8.0/aframe.min.js"></script>
-<script src="https://cdn.rawgit.com/jeromeetienne/AR.js/1.6.0/aframe/build/aframe-ar.js"></script>
-<body style='margin : 0px; overflow: hidden;'>
-	<a-scene embedded arjs='sourceType: webcam;'>
-		<a-box position='0 0.5 0' material='opacity: 0.5;'></a-box>
-		<a-marker-camera preset='hiro'></a-marker-camera>
-	</a-scene>
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Démos AR.js - Réalité Augmentée Web</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+        
+        header {
+            text-align: center;
+            color: white;
+            margin-bottom: 40px;
+            padding: 20px;
+        }
+        
+        h1 {
+            font-size: 3em;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+        
+        .subtitle {
+            font-size: 1.2em;
+            opacity: 0.9;
+        }
+        
+        .warning-box {
+            background: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 10px;
+            padding: 20px;
+            margin-bottom: 30px;
+            color: #856404;
+        }
+        
+        .warning-box h3 {
+            margin-bottom: 10px;
+            font-size: 1.3em;
+        }
+        
+        .demos-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 25px;
+            margin-bottom: 40px;
+        }
+        
+        .demo-card {
+            background: white;
+            border-radius: 15px;
+            overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            transition: transform 0.3s, box-shadow 0.3s;
+        }
+        
+        .demo-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 40px rgba(0,0,0,0.3);
+        }
+        
+        .demo-header {
+            padding: 20px;
+            background: linear-gradient(135deg, #42a5f5, #478ed1);
+            color: white;
+        }
+        
+        .demo-number {
+            font-size: 0.9em;
+            opacity: 0.8;
+            margin-bottom: 5px;
+        }
+        
+        .demo-title {
+            font-size: 1.5em;
+            margin-bottom: 5px;
+        }
+        
+        .demo-description {
+            padding: 20px;
+            color: #666;
+            line-height: 1.6;
+        }
+        
+        .demo-features {
+            padding: 0 20px 20px;
+        }
+        
+        .demo-features ul {
+            list-style: none;
+        }
+        
+        .demo-features li {
+            padding: 5px 0;
+            color: #555;
+        }
+        
+        .demo-features li:before {
+            content: "✓ ";
+            color: #4CAF50;
+            font-weight: bold;
+            margin-right: 8px;
+        }
+        
+        .demo-action {
+            padding: 20px;
+            background: #f8f9fa;
+            text-align: center;
+        }
+        
+        .btn {
+            display: inline-block;
+            padding: 12px 30px;
+            background: #4CAF50;
+            color: white;
+            text-decoration: none;
+            border-radius: 25px;
+            font-weight: bold;
+            transition: background 0.3s;
+        }
+        
+        .btn:hover {
+            background: #45a049;
+        }
+        
+        .btn-secondary {
+            background: #ff6b6b;
+        }
+        
+        .btn-secondary:hover {
+            background: #ff5252;
+        }
+        
+        .marker-section {
+            background: white;
+            border-radius: 15px;
+            padding: 30px;
+            text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+        
+        .marker-section h2 {
+            color: #333;
+            margin-bottom: 20px;
+            font-size: 2em;
+        }
+        
+        .marker-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+        
+        .icon {
+            font-size: 2em;
+            margin-bottom: 10px;
+        }
+        
+        .status-badge {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 0.8em;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        
+        .status-works {
+            background: #4CAF50;
+            color: white;
+        }
+        
+        .status-broken {
+            background: #f44336;
+            color: white;
+        }
+        
+        .status-partial {
+            background: #ff9800;
+            color: white;
+        }
+        
+        @media (max-width: 768px) {
+            h1 {
+                font-size: 2em;
+            }
+            
+            .demos-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>🎯 Démos AR.js</h1>
+            <p class="subtitle">Explorez la réalité augmentée directement dans votre navigateur !</p>
+        </header>
+        
+        <div class="warning-box">
+            <h3>⚠️ Avant de commencer</h3>
+            <p>Vous aurez besoin du <strong>marqueur Hiro</strong> pour voir les objets 3D apparaître.</p>
+            <p>👉 <a href="marqueur-hiro.html" style="color: #856404; font-weight: bold;">Obtenez le marqueur ici</a> (à afficher sur votre téléphone ou imprimer)</p>
+        </div>
+        
+        <div class="demos-grid">
+            <div class="demo-card" style="position: relative;">
+                <span class="status-badge status-works">✓ Fonctionne</span>
+                <div class="demo-header">
+                    <div class="demo-number">Démo 1</div>
+                    <h3 class="demo-title">Boîte Transparente</h3>
+                </div>
+                <div class="demo-description">
+                    Une simple boîte 3D semi-transparente qui apparaît sur le marqueur Hiro.
+                </div>
+                <div class="demo-features">
+                    <ul>
+                        <li>Objet 3D basique</li>
+                        <li>Effet de transparence</li>
+                        <li>Idéal pour débuter</li>
+                    </ul>
+                </div>
+                <div class="demo-action">
+                    <div class="icon">📦</div>
+                    <a href="demo-boite-transparente.html" class="btn">Lancer la démo</a>
+                </div>
+            </div>
+            
+            <div class="demo-card" style="position: relative;">
+                <span class="status-badge status-broken">× Ne fonctionne pas</span>
+                <div class="demo-header">
+                    <div class="demo-number">Démo 2</div>
+                    <h3 class="demo-title">Sphère Bleue</h3>
+                </div>
+                <div class="demo-description">
+                    Une sphère 3D de couleur bleue qui flotte au-dessus du marqueur.
+                </div>
+                <div class="demo-features">
+                    <ul>
+                        <li>Forme géométrique différente</li>
+                        <li>Couleur personnalisée</li>
+                        <li>Position ajustée</li>
+                    </ul>
+                </div>
+                <div class="demo-action">
+                    <div class="icon">🔵</div>
+                    <a href="demo-sphere-bleue.html" class="btn">Lancer la démo</a>
+                </div>
+            </div>
+            
+            <div class="demo-card" style="position: relative;">
+                <span class="status-badge status-broken">× Ne fonctionne pas</span>
+                <div class="demo-header">
+                    <div class="demo-number">Démo 3</div>
+                    <h3 class="demo-title">Sphère Bleue V2</h3>
+                </div>
+                <div class="demo-description">
+                    Version améliorée avec une structure HTML complète et optimisations.
+                </div>
+                <div class="demo-features">
+                    <ul>
+                        <li>Code mieux structuré</li>
+                        <li>Balises HTML complètes</li>
+                        <li>Configuration optimisée</li>
+                    </ul>
+                </div>
+                <div class="demo-action">
+                    <div class="icon">🔷</div>
+                    <a href="demo-sphere-bleue-v2.html" class="btn">Lancer la démo</a>
+                </div>
+            </div>
+            
+            <div class="demo-card" style="position: relative;">
+                <span class="status-badge status-partial">? Non testé</span>
+                <div class="demo-header" style="background: linear-gradient(135deg, #f093fb, #f5576c);">
+                    <div class="demo-number">Démo Avancée</div>
+                    <h3 class="demo-title">Multi-Marqueurs</h3>
+                </div>
+                <div class="demo-description">
+                    Démo avancée supportant 3 types de marqueurs différents simultanément !
+                </div>
+                <div class="demo-features">
+                    <ul>
+                        <li>Marqueur Hiro (boîte verte)</li>
+                        <li>Marqueur personnalisé (boîte rouge)</li>
+                        <li>Code-barres AR (boîte bleue)</li>
+                    </ul>
+                </div>
+                <div class="demo-action">
+                    <div class="icon">🎨</div>
+                    <a href="demo-multi-marqueurs.html" class="btn btn-secondary">Lancer la démo</a>
+                </div>
+            </div>
+        </div>
+        
+        <h2 style="text-align: center; color: white; margin: 40px 0 20px;">🧪 Démos de Test et Diagnostic</h2>
+        
+        <div class="demos-grid">
+            <div class="demo-card" style="position: relative;">
+                <span class="status-badge status-works">✓ Fonctionne</span>
+                <div class="demo-header" style="background: linear-gradient(135deg, #FF6B6B, #C44569);">
+                    <div class="demo-number">Test Debug</div>
+                    <h3 class="demo-title">Grosse Boîte Rouge</h3>
+                </div>
+                <div class="demo-description">
+                    Démo de test avec debug activé et une grosse boîte rouge visible.
+                </div>
+                <div class="demo-features">
+                    <ul>
+                        <li>Debug UI activé</li>
+                        <li>Grande boîte rouge</li>
+                        <li>Texte "ÇA MARCHE!"</li>
+                    </ul>
+                </div>
+                <div class="demo-action">
+                    <div class="icon">🔴</div>
+                    <a href="test-debug.html" class="btn">Tester</a>
+                </div>
+            </div>
+            
+            <div class="demo-card" style="position: relative;">
+                <span class="status-badge status-works">✓ Fonctionne</span>
+                <div class="demo-header" style="background: linear-gradient(135deg, #A8E6CF, #7FD1B9);">
+                    <div class="demo-number">Test Alternative</div>
+                    <h3 class="demo-title">Version Alternative</h3>
+                </div>
+                <div class="demo-description">
+                    Test avec une version alternative d'AR.js et une boîte rose.
+                </div>
+                <div class="demo-features">
+                    <ul>
+                        <li>AR.js NFT version</li>
+                        <li>Boîte rose</li>
+                        <li>Configuration différente</li>
+                    </ul>
+                </div>
+                <div class="demo-action">
+                    <div class="icon">🩷</div>
+                    <a href="test-alternative.html" class="btn">Tester</a>
+                </div>
+            </div>
+            
+            <div class="demo-card" style="position: relative;">
+                <span class="status-badge status-works">✓ Fonctionne</span>
+                <div class="demo-header" style="background: linear-gradient(135deg, #4FACFE, #00F2FE);">
+                    <div class="demo-number">Test Sphère</div>
+                    <h3 class="demo-title">Sphère Simple</h3>
+                </div>
+                <div class="demo-description">
+                    Test simple avec une grosse sphère bleue pour vérifier si les sphères fonctionnent.
+                </div>
+                <div class="demo-features">
+                    <ul>
+                        <li>Grande sphère bleue</li>
+                        <li>Code identique à test-debug</li>
+                        <li>Test de géométrie</li>
+                    </ul>
+                </div>
+                <div class="demo-action">
+                    <div class="icon">🔵</div>
+                    <a href="sphere-simple.html" class="btn">Tester</a>
+                </div>
+            </div>
+            
+            <div class="demo-card" style="position: relative;">
+                <span class="status-badge status-works">✓ Fonctionne</span>
+                <div class="demo-header" style="background: linear-gradient(135deg, #FA709A, #FEE140);">
+                    <div class="demo-number">Test Multi</div>
+                    <h3 class="demo-title">Multi-Boîtes</h3>
+                </div>
+                <div class="demo-description">
+                    Test avec plusieurs boîtes colorées pour vérifier les objets multiples.
+                </div>
+                <div class="demo-features">
+                    <ul>
+                        <li>4 boîtes colorées</li>
+                        <li>Rouge, vert, bleu, jaune</li>
+                        <li>Positions différentes</li>
+                    </ul>
+                </div>
+                <div class="demo-action">
+                    <div class="icon">🎨</div>
+                    <a href="test-multi-boxes.html" class="btn">Tester</a>
+                </div>
+            </div>
+            
+            <div class="demo-card" style="position: relative;">
+                <span class="status-badge status-works">✓ Fonctionne</span>
+                <div class="demo-header" style="background: linear-gradient(135deg, #667eea, #764ba2);">
+                    <div class="demo-number">Alternative</div>
+                    <h3 class="demo-title">Icosphère et Polyèdres</h3>
+                </div>
+                <div class="demo-description">
+                    Utilise des polyèdres (icosahedron, octahedron, dodecahedron) qui ressemblent à des sphères.
+                </div>
+                <div class="demo-features">
+                    <ul>
+                        <li>Icosahedron bleu (20 faces)</li>
+                        <li>Octahedron vert en rotation</li>
+                        <li>Dodecahedron rouge qui monte</li>
+                    </ul>
+                </div>
+                <div class="demo-action">
+                    <div class="icon">💎</div>
+                    <a href="demo-icosphere.html" class="btn">Tester</a>
+                </div>
+            </div>
+        </div>
+        
+        <div class="marker-section">
+            <h2>🎯 Besoin du marqueur ?</h2>
+            <p style="color: #666; margin-bottom: 20px;">
+                Le marqueur Hiro est nécessaire pour toutes les démos. 
+                Vous pouvez l'afficher sur votre téléphone ou l'imprimer.
+            </p>
+            <div class="marker-buttons">
+                <a href="marqueur-hiro.html" class="btn">Obtenir le marqueur</a>
+                <a href="hiro-marker.png" class="btn" download>Télécharger l'image</a>
+            </div>
+        </div>
+    </div>
 </body>
+</html>
